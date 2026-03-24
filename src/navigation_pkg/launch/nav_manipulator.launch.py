@@ -8,9 +8,8 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     map_file = os.path.join(
-        get_package_share_directory('navigation_pkg'), 'config', 'my_map_V2.yaml'
+        get_package_share_directory('navigation_pkg'), 'config', 'my_map.yaml'
     )
-
     param_file = os.path.join(
         get_package_share_directory('navigation_pkg'), 'config', 'turtlebot3.yaml'
     )
@@ -24,6 +23,16 @@ def generate_launch_description():
         get_package_share_directory('turtlebot3_manipulation_moveit_config'),
         'launch', 'move_group.launch.py'
     )
+    
+    #Keepout zone
+    keepout_mask_file = os.path.join(
+        get_package_share_directory('navigation_pkg'), 'config', 'keepout_mask.yaml'
+    )
+    
+    # keepout_launch = os.path.join(
+    #     get_package_share_directory('nav2_bringup'),
+    #     'launch', 'keepout_zone.launch.py'
+    # )
 
     return LaunchDescription([
         # IncludeLaunchDescription(
@@ -45,4 +54,34 @@ def generate_launch_description():
                 'use_sim_time': 'true',
             }.items()
         ),
+        
+        Node(
+            package='nav2_map_server',
+            executable='map_server',
+            name='keepout_filter_mask_server',
+            output='screen',
+            parameters=[{
+                'use_sim_time': True,
+                'yaml_filename': keepout_mask_file,  # define this path like your other files
+            }],
+        ),
+        Node(
+            package='nav2_map_server',
+            executable='costmap_filter_info_server',
+            name='keepout_costmap_filter_info_server',
+            output='screen',
+            parameters=[param_file],
+        ),
+        Node(
+            package='nav2_lifecycle_manager',
+            executable='lifecycle_manager',
+            name='lifecycle_manager_keepout',
+            output='screen',
+            parameters=[{
+                'use_sim_time': True,
+                'autostart': True,
+                'node_names': ['keepout_filter_mask_server', 'keepout_costmap_filter_info_server'],
+            }],
+        ),
+        
     ])
