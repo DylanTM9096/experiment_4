@@ -23,8 +23,6 @@ def main() -> None:
     # Inspection route, probably read in from a file for a real application
     # from either a map or drive and repeat. (x, y, yaw)
     inspection_route = [
-        [3.0, 0.0],
-        [3.0, 2.3],
         [0.0, 2.3],
     ]
 
