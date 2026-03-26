@@ -17,7 +17,7 @@ To build;
 
 To start turtlebot on rasberrypi run this:
 *this one doenst launch bringup with the manipulator  
-`ros2 launch turtlebot3_bringup robot.launch.py`
+`ros2 launch turtlebot3_manipulation_bringup hardware.launch.py`
 
 To start the turblebot in gazebo the experiment 1 map only:  
 `ros2 launch simulation_pkg custom_world.launch.py`
@@ -27,7 +27,6 @@ To start turtlebot navigation with nav2 run:
 
 To run scripts run:  
 `ros2 run navigation_pkg test1.py`
-
 
 To manually drive the robot use:  
 `ros2 run turtlebot3_teleop teleop_keyboard` 
