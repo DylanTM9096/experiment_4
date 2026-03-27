@@ -145,7 +145,7 @@ class TB3FinalMission(Node):
         init_pose = PoseStamped()
         init_pose.header.frame_id = 'map'
         init_pose.header.stamp = self.get_clock().now().to_msg()
-        init_pose.pose.position.x, init_pose.pose.position.y, init_pose.pose.orientation.w = 0.0, 0.0, 1.0
+        init_pose.pose.position.x, init_pose.pose.position.y, init_pose.pose.orientation.w = 0.55, 0.78, 1.0
         self.navigator.setInitialPose(init_pose)
         self.navigator.waitUntilNav2Active()
 
