@@ -158,7 +158,7 @@ class TB3FinalMission(Node):
         # Tight tolerances so it stays horizontal
         ori_con.absolute_x_axis_tolerance = 0.05
         ori_con.absolute_y_axis_tolerance = 0.05
-        ori_con.absolute_z_axis_tolerance = 0.05
+        ori_con.absolute_z_axis_tolerance = 3.14
 
         ori_con.weight = 1.0
 
@@ -169,6 +169,8 @@ class TB3FinalMission(Node):
         # Pack and send goal
         goal_msg = MoveGroup.Goal()
         goal_msg.request.group_name = "arm" 
+        goal_msg.request.num_planning_attempts = 10
+        goal_msg.request.allowed_planning_time = 5.0
         # Now append the fully built constraints object to the list
         goal_msg.request.goal_constraints.append(my_constraints)
 
@@ -261,11 +263,29 @@ class TB3FinalMission(Node):
             self.get_logger().info("Arrived. Opening gripper...")
             self.send_gripper_goal(close=False) # Open first
 
+            # self.get_logger().info("Lining up arm...")
+            # self.send_pick_goal(pos=[0.27, 0.00], z_height=0.10)
+
+            # self.get_logger().info("Lining up arm...")
+            # self.send_pick_goal(pos=[0.27, -0.01], z_height=0.10)
+
+            # self.get_logger().info("Lining up arm...")
+            # self.send_pick_goal(pos=[0.27, -0.02], z_height=0.10)
+
+            # self.get_logger().info("Lining up arm...")
+            # self.send_pick_goal(pos=[0.27, -0.03], z_height=0.10)
+
+            # self.get_logger().info("Lining up arm...")
+            # self.send_pick_goal(pos=[0.27, -0.04], z_height=0.10)
+
+            # self.get_logger().info("Lining up arm...")
+            # self.send_pick_goal(pos=[0.27, -0.05], z_height=0.10)
+
             self.get_logger().info("Lining up arm...")
-            self.send_pick_goal(approach_offset=0.10)
+            self.send_pick_goal(pos=[0.20, 0.00], z_height=0.15)
 
             self.get_logger().info("Reaching for object...")
-            self.send_pick_goal(z_height=0.00)
+            self.send_pick_goal(z_height=0.1)
 
             self.get_logger().info("Grasping...")
             self.send_gripper_goal(close=True) # Close claws
