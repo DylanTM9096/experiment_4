@@ -205,34 +205,22 @@ class TB3FinalMission(Node):
         else:
             # Map common codes to readable messages
             error_map = {
-                -31: "NO_IK_SOLUTION (Beyond arm reach)",
+                -31: "NO_IK_SOLUTION",
                 -1: "PLANNING_FAILED",
                 -12: "GOAL_IN_COLLISION",
                 -14: "GOAL_CONSTRAINTS_VIOLATED",
                 -27: "INVALID_MOTION_PLAN (Goal or Start in collision)",
-                99999: "GENERAL_FAILURE"
+                99999: "Beyond arm reach"
             }
             err_msg = error_map.get(error_code, f"Unknown Error Code: {error_code}")
             self.get_logger().error(f"MoveGroup failed with status: {err_msg}")
             return False
 
-    def run_mission(self):
-        # I. INITIAL POSE (Tell the robot where it is on the map)
-        init_pose = PoseStamped()
-        init_pose.header.frame_id = 'map'
-        init_pose.header.stamp = self.get_clock().now().to_msg()
-        init_pose.pose.position.x, init_pose.pose.position.y, init_pose.pose.orientation.z, init_pose.pose.orientation.w = 0.0, 0.0, 0.0, 1.0
-        self.navigator.setInitialPose(init_pose)
-        self.navigator.waitUntilNav2Active()
+    def run_mission(self, route):
+        
 
         # II. NAVIGATE ROUTE [x, y, z_val, w_val]
-        route = [
-                [3.0, 0.2, 0.707, 0.707], # 90 degrees (Left)
-                [3.0, 1.8, 1.0, 0.0],     # 180 degrees (Backward)
-                [0.0, 1.8, 1.0, 0.0], 
-                [3.0, 1.8, 0.707, -0.707], # 270 degrees (Right)
-                [3.0, 0.2, 1.0, 0.0], # 180 degrees (Backward)
-            ]
+        
         waypoints = []
         for p in route[:3]:
             wp = PoseStamped()
@@ -262,24 +250,6 @@ class TB3FinalMission(Node):
         if self.navigator.getResult() == TaskResult.SUCCEEDED:
             self.get_logger().info("Arrived. Opening gripper...")
             self.send_gripper_goal(close=False) # Open first
-
-            # self.get_logger().info("Lining up arm...")
-            # self.send_pick_goal(pos=[0.27, 0.00], z_height=0.10)
-
-            # self.get_logger().info("Lining up arm...")
-            # self.send_pick_goal(pos=[0.27, -0.01], z_height=0.10)
-
-            # self.get_logger().info("Lining up arm...")
-            # self.send_pick_goal(pos=[0.27, -0.02], z_height=0.10)
-
-            # self.get_logger().info("Lining up arm...")
-            # self.send_pick_goal(pos=[0.27, -0.03], z_height=0.10)
-
-            # self.get_logger().info("Lining up arm...")
-            # self.send_pick_goal(pos=[0.27, -0.04], z_height=0.10)
-
-            # self.get_logger().info("Lining up arm...")
-            # self.send_pick_goal(pos=[0.27, -0.05], z_height=0.10)
 
             self.get_logger().info("Lining up arm...")
             self.send_pick_goal(pos=[0.20, 0.00], z_height=0.15)
@@ -320,11 +290,46 @@ class TB3FinalMission(Node):
         while not self.navigator.isTaskComplete():
             rclpy.spin_once(self, timeout_sec=0.1)
 
+        if self.navigator.getResult() == TaskResult.SUCCEEDED:
+            
+            self.get_logger().info("Reaching for object...")
+            self.send_pick_goal(pos=[0.30, 0.0], z_height=0.1)
+
+            self.get_logger().info("Arrived. Opening gripper...")
+            self.send_gripper_goal(close=False) # Open first
+
+            self.get_logger().info("Picking object up...")
+            self.send_pick_goal(pos=[0.15, 0.0], z_height=0.25)
+
 def main():
     rclpy.init()
     mission = TB3FinalMission()
+
+    # I. INITIAL POSE (Tell the robot where it is on the map)
+    init_pose = PoseStamped()
+    init_pose.header.frame_id = 'map'
+    init_pose.header.stamp = mission.get_clock().now().to_msg()
+    init_pose.pose.position.x, init_pose.pose.position.y, init_pose.pose.orientation.z, init_pose.pose.orientation.w = 0.0, 0.0, 0.0, 1.0
+    mission.navigator.setInitialPose(init_pose)
+    mission.navigator.waitUntilNav2Active()
+
+    route1 = [
+                [2.0, 0.0, 0.707, 0.707], # 90 degrees (Left)
+                [2.0, 2.0, 1.0, 0.0],     # 180 degrees (Backward)
+                [0.0, 1.9, 1.0, 0.0], 
+                [2.0, 2.0, 0.707, -0.707], # 270 degrees (Right)
+                [2.0, 0.0, 1.0, 0.0], # 180 degrees (Backward)
+            ]
+    route2 = [
+                [2.0, 0.0, 0.707, 0.707], # 90 degrees (Left)
+                [2.0, 2.0, 1.0, 0.0],     # 180 degrees (Backward)
+                [0.0, 1.9, 1.0, 0.0], 
+                [2.0, 2.0, 0.707, -0.707], # 270 degrees (Right)
+                [2.0, 0.0, 1.0, 0.0], # 180 degrees (Backward)
+            ]
     try:
-        mission.run_mission()
+        mission.run_mission(route1)
+        mission.run_mission(route2)
     finally:
         rclpy.shutdown()
 

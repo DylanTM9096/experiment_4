@@ -10,6 +10,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+from launch.actions import TimerAction
 
 def generate_launch_description():
     launch_file_dir = os.path.join(get_package_share_directory('turtlebot3_gazebo'), 'launch')
@@ -19,8 +20,8 @@ def generate_launch_description():
     world_path = os.path.join(pkg_sim, 'worlds', 'turtlebot3_expirement1.world')
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
-    x_pose = LaunchConfiguration('x_pose', default='0.6')
-    y_pose = LaunchConfiguration('y_pose', default='3.5')
+    x_pose = LaunchConfiguration('x_pose', default='0.5')
+    y_pose = LaunchConfiguration('y_pose', default='2.5')
     z_pose = LaunchConfiguration('z_pose', default='0.01')
     roll  = LaunchConfiguration('roll',  default='0.00')
     pitch = LaunchConfiguration('pitch', default='0.00')
@@ -73,9 +74,14 @@ def generate_launch_description():
         'GAZEBO_MODEL_PATH',
         os.path.join(pkg_sim, 'models') + ':' + os.environ.get('GAZEBO_MODEL_PATH', '')
     ))
+
+    spawn_entity_delayed = TimerAction(
+        period=1.0,
+        actions=[spawn_entity_cmd]
+    )
     
     ld.add_action(gzserver_cmd)
     ld.add_action(gzclient_cmd)
+    ld.add_action(spawn_entity_delayed)
     ld.add_action(manipulator_base_cmd)
-    ld.add_action(spawn_entity_cmd)
     return ld
