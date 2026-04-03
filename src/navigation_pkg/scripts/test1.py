@@ -217,8 +217,6 @@ class TB3FinalMission(Node):
             return False
 
     def run_mission(self, route):
-        
-
         # II. NAVIGATE ROUTE [x, y, z_val, w_val]
         
         waypoints = []
@@ -266,7 +264,7 @@ class TB3FinalMission(Node):
         # IV. RETURN HOME
         self.get_logger().info("Returning Home...")
         waypoints = []
-        for p in route[3:5]:
+        for p in route[3:]:
             wp = PoseStamped()
             wp.header.frame_id = 'map'
             wp.header.stamp = self.get_clock().now().to_msg()
@@ -283,7 +281,6 @@ class TB3FinalMission(Node):
             
             waypoints.append(deepcopy(wp))
 
-        waypoints.append(deepcopy(init_pose))
         self.navigator.followWaypoints(waypoints)
 
         # Spinning is critical so the LiDAR data updates while moving
@@ -292,13 +289,13 @@ class TB3FinalMission(Node):
 
         if self.navigator.getResult() == TaskResult.SUCCEEDED:
             
-            self.get_logger().info("Reaching for object...")
-            self.send_pick_goal(pos=[0.30, 0.0], z_height=0.1)
+            self.get_logger().info("Putting object down...")
+            self.send_pick_goal(pos=[0.40, 0.0], z_height=0.1)
 
             self.get_logger().info("Arrived. Opening gripper...")
             self.send_gripper_goal(close=False) # Open first
 
-            self.get_logger().info("Picking object up...")
+            self.get_logger().info("Stowing arm...")
             self.send_pick_goal(pos=[0.15, 0.0], z_height=0.25)
 
 def main():
@@ -313,19 +310,21 @@ def main():
     mission.navigator.setInitialPose(init_pose)
     mission.navigator.waitUntilNav2Active()
 
+    # II. NAVIGATE ROUTE [x, y, z_val, w_val]
     route1 = [
                 [2.0, 0.0, 0.707, 0.707], # 90 degrees (Left)
-                [2.0, 2.0, 1.0, 0.0],     # 180 degrees (Backward)
+                [2.0, 2.0, 1.0, 0.0], # 180 degrees (Backward)
                 [0.0, 1.9, 1.0, 0.0], 
                 [2.0, 2.0, 0.707, -0.707], # 270 degrees (Right)
                 [2.0, 0.0, 1.0, 0.0], # 180 degrees (Backward)
+                [0.0, 0.0, 1.0, 0.0]
             ]
     route2 = [
-                [2.0, 0.0, 0.707, 0.707], # 90 degrees (Left)
-                [2.0, 2.0, 1.0, 0.0],     # 180 degrees (Backward)
-                [0.0, 1.9, 1.0, 0.0], 
-                [2.0, 2.0, 0.707, -0.707], # 270 degrees (Right)
-                [2.0, 0.0, 1.0, 0.0], # 180 degrees (Backward)
+                [0.0, 2.0, 0.0, 1.0],
+                [1.0, 2.0, 0.707, -0.707],
+                [1.0, 1.1, 0.707, -0.707], 
+                [1.0, 2.0, 0.0, 1.0],
+                [2.0, 0.0, 0.707, -0.707],
             ]
     try:
         mission.run_mission(route1)
