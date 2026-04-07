@@ -17,6 +17,7 @@ install(PROGRAMS
   # scripts/multi_waypoint.py
   # scripts/single_goal_nav.py
   scripts/test1.py
+  scripts/test1_ep2.py
   scripts/test2.py
   # scripts/test2.py
   # scripts/mobile_manip.py
